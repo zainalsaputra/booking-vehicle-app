@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Models\Role;
 use App\Models\User;
 // use Validator;
 use Illuminate\Http\Request;
@@ -18,25 +19,34 @@ class AuthController extends BaseController
      */
     public function register(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
-            'role' => 'sometimes|string|in:admin,approval',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'role' => 'required|string|in:admin,approval',
         ]);
 
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
-        $input = $request->all();
+        $input = $request->only('name', 'email', 'password');
         $input['password'] = bcrypt($input['password']);
-        $user = User::create($input);
-        $success['user'] =  $user;
 
-        return $this->sendResponse($success, 'User register successfully.');
+        if ($request->filled('role')) {
+            $role = Role::where('name', $request->role)->first();
+            if (!$role) {
+                return $this->sendError('Invalid role provided.');
+            }
+            $input['role_id'] = $role->id;
+        }
+
+        $user = User::create(attributes: $input);
+        $success['user'] = $user;
+
+        return $this->sendResponse($success, 'User registered successfully.');
     }
+
 
 
     /**
