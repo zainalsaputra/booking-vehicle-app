@@ -25,3 +25,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{id}/reject', [VehicleRequestController::class, 'reject']);
     });
 });
+
+Route::prefix('approvals')->middleware('auth:api')->group(function () {
+    Route::get('/pending', [VehicleRequestController::class, 'pendingApprovals']);
+    Route::get('/history', [VehicleRequestController::class, 'approvalHistory']);
+});

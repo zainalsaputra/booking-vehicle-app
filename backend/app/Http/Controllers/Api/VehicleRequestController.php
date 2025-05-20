@@ -105,6 +105,16 @@ class VehicleRequestController extends Controller
             ->where('status', 'pending')
             ->firstOrFail();
 
+        $isRejected = VehicleApproval::where('vehicle_request_id', $id)
+            ->where('status', 'rejected')
+            ->exists();
+
+        if ($isRejected) {
+            return response()->json([
+                'message' => 'Permintaan ini telah ditolak oleh approver sebelumnya. Anda tidak dapat melakukan approval.',
+            ], 403);
+        }
+
         $previousLevelsPending = VehicleApproval::where('vehicle_request_id', $id)
             ->where('level', '<', $requestApproval->level)
             ->where('status', '!=', 'approved')
@@ -112,7 +122,7 @@ class VehicleRequestController extends Controller
 
         if ($previousLevelsPending > 0) {
             return response()->json([
-                'message' => 'Anda tidak dapat menyetujui sebelum approver di level sebelumnya menyetujui.'
+                'message' => 'Approver pertama masih belum melakukan review.'
             ], 403);
         }
 
@@ -120,7 +130,7 @@ class VehicleRequestController extends Controller
             'status' => 'approved',
             'note' => $request->note
         ]);
-
+        
         $pendingCount = VehicleApproval::where('vehicle_request_id', $id)
             ->where('status', 'pending')
             ->count();
@@ -143,6 +153,7 @@ class VehicleRequestController extends Controller
         ]);
     }
 
+
     public function reject(Request $request, $id)
     {
         $request->validate([
@@ -152,16 +163,25 @@ class VehicleRequestController extends Controller
         $requestApproval = VehicleApproval::where('vehicle_request_id', $id)
             ->where('approver_id', Auth::id())
             ->where('status', 'pending')
-            ->orderBy('level')
             ->firstOrFail();
+
+        $previousLevelsPending = VehicleApproval::where('vehicle_request_id', $id)
+            ->where('level', '<', $requestApproval->level)
+            ->where('status', '!=', 'rejected')
+            ->count();
+
+        if ($previousLevelsPending > 0) {
+            return response()->json([
+                'message' => 'Approver pertama masih belum melakukan review.'
+            ], 403);
+        }
 
         $requestApproval->update([
             'status' => 'rejected',
             'note' => $request->note
         ]);
 
-        // Ubah status utama menjadi "rejected" secara keseluruhan
-        $requestModel = VehicleRequest::find($id);
+        $requestModel = VehicleRequest::findOrFail($id);
         $requestModel->update(['status' => 'rejected']);
 
         ActivityLogger::log(
@@ -175,5 +195,53 @@ class VehicleRequestController extends Controller
             'message' => 'Permintaan kendaraan ditolak',
             'data' => $requestApproval
         ]);
+    }
+
+    public function pendingApprovals()
+    {
+        $approvals = VehicleApproval::with(['vehicleRequest.user', 'vehicleRequest.vehicle'])
+            ->where('approver_id', Auth::id())
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $response = $approvals->map(function ($approval) {
+            return [
+                'id' => $approval->id,
+                'vehicle_request_id' => $approval->vehicle_request_id,
+                'nama_pemohon' => $approval->vehicleRequest->user->name,
+                'nama_kendaraan' => $approval->vehicleRequest->vehicle->name,
+                'tujuan' => $approval->vehicleRequest->purpose,
+                'tanggal_mulai' => $approval->vehicleRequest->start_date,
+                'tanggal_selesai' => $approval->vehicleRequest->end_date,
+                'status' => $approval->status,
+                'level' => $approval->level,
+            ];
+        });
+
+        return response()->json($response);
+    }
+
+    public function approvalHistory()
+    {
+        $approvals = VehicleApproval::with(['vehicleRequest.user', 'vehicleRequest.vehicle'])
+            ->where('approver_id', Auth::id())
+            ->whereIn('status', ['approved', 'rejected'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        $response = $approvals->map(function ($approval) {
+            return [
+                'id' => $approval->id,
+                'vehicle_request_id' => $approval->vehicle_request_id,
+                'nama_pemohon' => $approval->vehicleRequest->user->name,
+                'nama_kendaraan' => $approval->vehicleRequest->vehicle->name,
+                'status' => $approval->status,
+                'catatan' => $approval->note,
+                'tanggal' => $approval->updated_at,
+            ];
+        });
+
+        return response()->json($response);
     }
 }
