@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 import axios from "axios";
 import { Menu } from "@headlessui/react";
 import {
@@ -16,7 +17,6 @@ export function Tables() {
   const [pengajuanData, setPengajuanData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
 
   const vehicles = [
     { id: 1, name: "Toyota Hilux" },
@@ -61,7 +61,7 @@ export function Tables() {
         return;
       }
 
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:8000/api/vehicle-requests",
         {
           purpose: formData.purpose,

@@ -34,7 +34,7 @@ export function SignIn() {
       if (result.success) {
         localStorage.setItem("accessToken", result.data.access_token);
         Swal.fire({ icon: "success", title: "Berhasil Login!" });
-        navigate("/dashboard");
+        navigate("/dashboard/home");
       } else {
         Swal.fire({
           icon: "error",
