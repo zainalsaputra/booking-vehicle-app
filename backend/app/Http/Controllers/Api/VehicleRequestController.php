@@ -24,7 +24,7 @@ class VehicleRequestController extends Controller
     {
         $validated = $request->validate([
             'vehicle_id' => 'required|exists:vehicles,id',
-            'vehicle_driver_id' => 'required|exists:vehicle_drivers,id',
+            'driver_id' => 'required|exists:drivers,id',
             'approver_ids' => 'required|array|min:2',
             'approver_ids.*' => 'exists:users,id',
             'start_date' => 'required|date',
@@ -35,7 +35,7 @@ class VehicleRequestController extends Controller
         $vehicleRequest = VehicleRequest::create([
             'user_id' => Auth::id(),
             'vehicle_id' => $validated['vehicle_id'],
-            'vehicle_driver_id' => $validated['vehicle_driver_id'],
+            'driver_id' => $validated['driver_id'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'purpose' => $validated['purpose'],

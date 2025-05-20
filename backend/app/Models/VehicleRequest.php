@@ -12,7 +12,7 @@ class VehicleRequest extends Model
      protected $fillable = [
         'user_id',
         'vehicle_id',
-        'vehicle_driver_id',
+        'driver_id',
         'start_date',
         'end_date',
         'purpose',

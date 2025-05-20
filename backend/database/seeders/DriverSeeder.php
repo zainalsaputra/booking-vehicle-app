@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\VehicleDriver;
+use App\Models\Driver;
 
-class VehicleDriverSeeder extends Seeder
+class DriverSeeder extends Seeder
 {
     public function run(): void
     {
@@ -16,7 +16,7 @@ class VehicleDriverSeeder extends Seeder
         ];
 
         foreach ($drivers as $driver) {
-            VehicleDriver::create($driver);
+            Driver::create($driver);
         }
     }
 }

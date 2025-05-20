@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             VehicleTypeSeeder::class,
             VehicleSeeder::class,
-            VehicleDriverSeeder::class,
+            DriverSeeder::class,
             OfficeSeeder::class,
         ]);
     }
