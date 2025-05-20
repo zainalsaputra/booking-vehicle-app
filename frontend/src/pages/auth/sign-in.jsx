@@ -33,8 +33,8 @@ export function SignIn() {
 
       if (result.success) {
         localStorage.setItem("accessToken", result.data.access_token);
-        Swal.fire({ icon: "success", title: "Berhasil Login!" });
         navigate("/dashboard/home");
+        window.location.reload();
       } else {
         Swal.fire({
           icon: "error",

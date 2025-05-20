@@ -52,7 +52,6 @@ export function DashboardNavbar() {
       if (result.isConfirmed) {
         localStorage.removeItem("accessToken");
         navigate("/auth/sign-in");
-        Swal.fire("Sukses!", "Anda telah berhasil logout.", "success");
       }
     });
   };
@@ -95,9 +94,6 @@ export function DashboardNavbar() {
           </Typography>
         </div>
         <div className="flex items-center">
-          <div className="mr-auto md:mr-4 md:w-56">
-            <Input label="Search" />
-          </div>
           <IconButton
             variant="text"
             color="blue-gray"

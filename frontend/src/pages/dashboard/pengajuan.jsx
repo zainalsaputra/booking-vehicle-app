@@ -9,7 +9,7 @@ import {
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 
-export function Tables() {
+export function Pengajuan() {
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);

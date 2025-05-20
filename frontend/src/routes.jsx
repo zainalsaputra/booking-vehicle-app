@@ -1,18 +1,31 @@
+import { jwtDecode } from "jwt-decode";
 import {
   HomeIcon,
-  UserCircleIcon,
   TableCellsIcon,
-  InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
+import { Home, Approver, Pengajuan } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
+
+// Decode token untuk mendapatkan role
+const token = localStorage.getItem("accessToken");
+let userRole = null;
+
+if (token) {
+  try {
+    const decodedToken = jwtDecode(token);
+    userRole = decodedToken.role_id; // Pastikan role_id ada dalam JWT
+  } catch (error) {
+    console.error("Gagal mendecode token:", error);
+  }
+}
 
 const icon = {
   className: "w-5 h-5 text-inherit",
 };
 
+// Definisi routes dengan kondisi role
 export const routes = [
   {
     layout: "dashboard",
@@ -23,39 +36,36 @@ export const routes = [
         path: "/home",
         element: <Home />,
       },
-      {
-        icon: <UserCircleIcon {...icon} />,
-        name: "profile",
-        path: "/profile",
-        element: <Profile />,
-      },
-      {
-        icon: <TableCellsIcon {...icon} />,
-        name: "tables",
-        path: "/tables",
-        element: <Tables />,
-      },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
-        path: "/notifications",
-        element: <Notifications />,
-      },
+      ...(userRole === 1
+        ? [
+            {
+              icon: <TableCellsIcon {...icon} />,
+              name: "pengajuan",
+              path: "/pengajuan",
+              element: <Pengajuan />,
+            },
+          ]
+        : []),
+      ...(userRole === 2
+        ? [
+            {
+              icon: <TableCellsIcon {...icon} />,
+              name: "approver",
+              path: "/approver",
+              element: <Approver />,
+            },
+          ]
+        : []), // Hanya tampil jika user role 2
     ],
   },
   {
-    title: "auth pages",
     layout: "auth",
     pages: [
       {
-        icon: <ServerStackIcon {...icon} />,
-        name: "sign in",
         path: "/sign-in",
         element: <SignIn />,
       },
       {
-        icon: <RectangleStackIcon {...icon} />,
-        name: "sign up",
         path: "/sign-up",
         element: <SignUp />,
       },
