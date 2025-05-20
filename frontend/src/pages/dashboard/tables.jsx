@@ -7,24 +7,109 @@ import {
   Chip,
   Tooltip,
   Progress,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  Input,
+  Button,
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { authorsTableData, projectsTableData } from "@/data";
+import { projectsTableData } from "@/data";
+import { useState } from "react";
 
 export function Tables() {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(!open);
+
+  const [authorsData, setAuthorsData] = useState([
+    {
+      img: "https://docs.material-tailwind.com/img/face-1.jpg",
+      name: "John Michael",
+      email: "john@creative-tim.com",
+      job: ["Manager", "Organization"],
+      online: true,
+      date: "23/04/18",
+    },
+  ]);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    jobTitle: "",
+    jobDept: "",
+    status: true,
+    date: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const handleSubmit = () => {
+    const newAuthor = {
+      img: "https://docs.material-tailwind.com/img/face-3.jpg",
+      name: formData.name,
+      email: formData.email,
+      job: [formData.jobTitle, formData.jobDept],
+      online: formData.status,
+      date: formData.date,
+    };
+    setAuthorsData([...authorsData, newAuthor]);
+    setFormData({
+      name: "",
+      email: "",
+      jobTitle: "",
+      jobDept: "",
+      status: true,
+      date: "",
+    });
+    handleOpen(); // Tutup dialog
+  };
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
+      {/* Floating Form Modal */}
+      <Dialog open={open} handler={handleOpen}>
+        <DialogHeader>Tambah Author</DialogHeader>
+        <DialogBody className="flex flex-col gap-4">
+          <Input label="Nama" name="name" value={formData.name} onChange={handleChange} />
+          <Input label="Email" name="email" value={formData.email} onChange={handleChange} />
+          <Input label="Jabatan" name="jobTitle" value={formData.jobTitle} onChange={handleChange} />
+          <Input label="Departemen" name="jobDept" value={formData.jobDept} onChange={handleChange} />
+          <Input label="Tanggal Mulai" name="date" value={formData.date} onChange={handleChange} />
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="red" onClick={handleOpen} className="mr-1">
+            Batal
+          </Button>
+          <Button variant="gradient" color="green" onClick={handleSubmit}>
+            Simpan
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Authors Table */}
       <Card>
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
-          <Typography variant="h6" color="white">
-            Authors Table
-          </Typography>
+          <div className="flex justify-between items-center w-full">
+            <Typography variant="h6" color="white">
+              Authors Table
+            </Typography>
+            <Button onClick={handleOpen} color="white" >
+              Buat Pengajuan
+            </Button>
+          </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["author", "function", "status", "employed", ""].map((el) => (
+                {["no", "kantor", "kendaraan", "supir", "tanggal", "status", ""].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -40,19 +125,17 @@ export function Tables() {
               </tr>
             </thead>
             <tbody>
-              {authorsTableData.map(
-                ({ img, name, email, job, online, date }, key) => {
-                  const className = `py-3 px-5 ${
-                    key === authorsTableData.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
-                  }`;
+              {authorsData.map(
+                ({ office, email, job, online, date }, key) => {
+                  const className = `py-3 px-5 ${key === authorsData.length - 1
+                    ? ""
+                    : "border-b border-blue-gray-50"
+                    }`;
 
                   return (
-                    <tr key={name}>
+                    <tr key={key}>
                       <td className={className}>
                         <div className="flex items-center gap-4">
-                          <Avatar src={img} alt={name} size="sm" variant="rounded" />
                           <div>
                             <Typography
                               variant="small"
@@ -87,112 +170,6 @@ export function Tables() {
                         <Typography className="text-xs font-semibold text-blue-gray-600">
                           {date}
                         </Typography>
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          as="a"
-                          href="#"
-                          className="text-xs font-semibold text-blue-gray-600"
-                        >
-                          Edit
-                        </Typography>
-                      </td>
-                    </tr>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
-        </CardBody>
-      </Card>
-      <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
-          <Typography variant="h6" color="white">
-            Projects Table
-          </Typography>
-        </CardHeader>
-        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-          <table className="w-full min-w-[640px] table-auto">
-            <thead>
-              <tr>
-                {["companies", "members", "budget", "completion", ""].map(
-                  (el) => (
-                    <th
-                      key={el}
-                      className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                    >
-                      <Typography
-                        variant="small"
-                        className="text-[11px] font-bold uppercase text-blue-gray-400"
-                      >
-                        {el}
-                      </Typography>
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {projectsTableData.map(
-                ({ img, name, members, budget, completion }, key) => {
-                  const className = `py-3 px-5 ${
-                    key === projectsTableData.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
-                  }`;
-
-                  return (
-                    <tr key={name}>
-                      <td className={className}>
-                        <div className="flex items-center gap-4">
-                          <Avatar src={img} alt={name} size="sm" />
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-bold"
-                          >
-                            {name}
-                          </Typography>
-                        </div>
-                      </td>
-                      <td className={className}>
-                        {members.map(({ img, name }, key) => (
-                          <Tooltip key={name} content={name}>
-                            <Avatar
-                              src={img}
-                              alt={name}
-                              size="xs"
-                              variant="circular"
-                              className={`cursor-pointer border-2 border-white ${
-                                key === 0 ? "" : "-ml-2.5"
-                              }`}
-                            />
-                          </Tooltip>
-                        ))}
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          variant="small"
-                          className="text-xs font-medium text-blue-gray-600"
-                        >
-                          {budget}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <div className="w-10/12">
-                          <Typography
-                            variant="small"
-                            className="mb-1 block text-xs font-medium text-blue-gray-600"
-                          >
-                            {completion}%
-                          </Typography>
-                          <Progress
-                            value={completion}
-                            variant="gradient"
-                            color={completion === 100 ? "green" : "gray"}
-                            className="h-1"
-                          />
-                        </div>
                       </td>
                       <td className={className}>
                         <Typography
