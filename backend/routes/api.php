@@ -1,14 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\API\AuthController;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
+use App\Http\Controllers\Api\VehicleRequestController;
  
 Route::group([
     'middleware' => 'api',
@@ -19,4 +14,12 @@ Route::group([
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
     Route::post('/profile', [AuthController::class, 'profile'])->middleware('auth:api');
+});
+
+Route::middleware('auth:api')->group(function () {
+    Route::prefix('vehicle-requests')->group(function () {
+        Route::get('/', [VehicleRequestController::class, 'index']);
+        Route::post('/', [VehicleRequestController::class, 'store']);
+        Route::get('{id}', [VehicleRequestController::class, 'show']);
+    });
 });

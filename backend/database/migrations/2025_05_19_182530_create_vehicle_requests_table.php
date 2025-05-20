@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('vehicle_id')->constrained();
-            $table->foreignId('vehicle_drivers_id')->nullable()->constrained();
+            $table->foreignId('vehicle_driver_id')->nullable()->constrained();
             $table->string('purpose');
-            $table->timestamp('start_time');
-            $table->timestamp('end_time');
+            $table->timestamp('start_date');
+            $table->timestamp('end_date');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
