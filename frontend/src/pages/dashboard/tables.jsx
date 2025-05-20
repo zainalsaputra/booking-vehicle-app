@@ -11,18 +11,11 @@ export function Tables() {
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [formData, setFormData] = useState({});
   const [pengajuanData, setPengajuanData] = useState([]);
-  const [approvers, setApprovers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const [formData, setFormData] = useState({
-    purpose: "",
-    office_id: "",
-    vehicle_id: "",
-    driver_id: "",
-    start_date: "",
-    end_date: "",
-    approver_ids: [],
-  });
 
   const vehicles = [
     { id: 1, name: "Toyota Hilux" },
@@ -36,56 +29,51 @@ export function Tables() {
     { id: 1, name: "Budi Santoso", phone: "08234567890" },
     { id: 2, name: "Rina Yuliati", phone: "085700011122" },
   ];
-
-  useEffect(() => {
-    setApprovers([
-      { id: 1, name: "Andi HRD", email: "andi@kantor.com" },
-      { id: 2, name: "Siti Finance", email: "siti@kantor.com" },
-    ]);
-  }, []);
+  const approvers = [
+    { id: 2, name: "Andi HRD", email: "andi@kantor.com" },
+    { id: 3, name: "Siti Finance", email: "siti@kantor.com" },
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleApproverToggle = (id) => {
-    setFormData((prev) => {
-      const updatedIds = prev.approver_ids.includes(id)
-        ? prev.approver_ids.filter((i) => i !== id)
-        : [...prev.approver_ids, id];
-      return { ...prev, approver_ids: updatedIds };
-    });
-  };
-
   const handleCreate = async () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      // const response = await axios.post(
-      //   "http://localhost:8000/api/vehicle-requests",
-      //   {
-      //     purpose: formData.purpose,
-      //     office_id: formData.office_id,
-      //     vehicle_id: formData.vehicle_id,
-      //     driver_id: formData.driver_id,
-      //     start_date: formData.start_date,
-      //     end_date: formData.end_date,
-      //     approver_ids: formData.approver_ids,
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //       "Content-Type": "application/json",
-      //     },
-      //   }
-      // );
+      const { approver1_id, approver2_id } = formData;
+      const approver_id = [approver1_id, approver2_id];
+      if (!approver1_id || !approver2_id || approver1_id === approver2_id) {
+        alert("Mohon pilih dua penyetuju yang berbeda.");
+        return;
+      }
 
-      console.log(formData);
+      console.log(approver_id);
 
-      // setPengajuanData((prev) => [...prev, response.data]);
-      // setFormData({});
-      // setOpen(false);
+      const response = await axios.post(
+        "http://localhost:8000/api/vehicle-requests",
+        {
+          purpose: formData.purpose,
+          office_id: formData.office_id,
+          vehicle_id: formData.vehicle_id,
+          driver_id: formData.driver_id,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          approver_ids: approver_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setPengajuanData((prev) => [...prev, response.data]);
+      setFormData({});
+      setOpen(false);
     } catch (error) {
       console.error("Gagal membuat pengajuan:", error);
     }
@@ -110,6 +98,11 @@ export function Tables() {
     };
     fetchPengajuan();
   }, []);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = pengajuanData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(pengajuanData.length / itemsPerPage);
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -137,24 +130,32 @@ export function Tables() {
           </select>
           <Input label="Tanggal Mulai" type="datetime-local" name="start_date" value={formData.start_date || ""} onChange={handleChange} />
           <Input label="Tanggal Selesai" type="datetime-local" name="end_date" value={formData.end_date || ""} onChange={handleChange} />
-          {/* Approvers (multiple) */}
-          <div>
-            <label className="block mb-1 font-medium text-sm text-gray-700">Approver</label>
-            <div className="space-y-2">
-              {approvers.map((approver) => (
-                <label key={approver.id} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    value={approver.id}
-                    checked={formData.approver_ids.includes(approver.id)}
-                    onChange={() => handleApproverToggle(approver.id)}
-                  />
-                  {approver.name} ({approver.email})
-                </label>
-              ))}
-            </div>
-          </div>
-
+          <select
+            name="approver1_id"
+            value={formData.approver1_id || ""}
+            onChange={handleChange}
+            className="border p-2 rounded w-full"
+          >
+            <option value="">Pilih Penyetuju 1</option>
+            {approvers.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name} ({a.email})
+              </option>
+            ))}
+          </select>
+          <select
+            name="approver2_id"
+            value={formData.approver2_id || ""}
+            onChange={handleChange}
+            className="border p-2 rounded w-full mt-2"
+          >
+            <option value="">Pilih Penyetuju 2</option>
+            {approvers.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name} ({a.email})
+              </option>
+            ))}
+          </select>
         </DialogBody>
         <DialogFooter>
           <Button variant="text" color="red" onClick={() => setOpen(false)}>Batal</Button>
@@ -190,9 +191,9 @@ export function Tables() {
               </tr>
             </thead>
             <tbody>
-              {pengajuanData.map((item, index) => (
+              {currentItems.map((item, index) => (
                 <tr key={item.id}>
-                  <td className="py-3 px-5">{index + 1}</td>
+                  <td className="py-3 px-5">{indexOfFirstItem + index + 1}</td>
                   <td className="py-3 px-5">
                     <Typography className="text-sm font-semibold text-blue-gray-600">{item.nama_kantor}</Typography>
                     <Typography className="text-xs font-normal text-blue-gray-500">{item.wilayah_kantor}</Typography>
@@ -259,6 +260,32 @@ export function Tables() {
               ))}
             </tbody>
           </table>
+          <div className="flex items-center justify-center gap-4 p-3 mt-4 border rounded-lg">
+            <Button
+              variant="outlined"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border-gray-500 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+            >
+              Sebelumnya
+            </Button>
+
+            <span className="text-sm font-medium text-gray-700">
+              Halaman <span className="font-semibold">{currentPage}</span> dari <span className="font-semibold">{totalPages}</span>
+            </span>
+
+            <Button
+              variant="outlined"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border-gray-500 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+            >
+              Selanjutnya
+            </Button>
+          </div>
+
         </CardBody>
       </Card>
     </div>
