@@ -9,16 +9,17 @@ class VehicleRequest extends Model
 {
     use HasFactory;
 
-     protected $fillable = [
+    protected $fillable = [
         'user_id',
         'vehicle_id',
         'driver_id',
+        'office_id',
         'start_date',
         'end_date',
         'purpose',
         'status'
     ];
-    
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -37,5 +38,10 @@ class VehicleRequest extends Model
     public function approvals()
     {
         return $this->hasMany(VehicleApproval::class);
+    }
+
+    public function office()
+    {
+        return $this->belongsTo(Office::class);
     }
 }

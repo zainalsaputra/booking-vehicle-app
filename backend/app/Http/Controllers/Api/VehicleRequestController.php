@@ -13,11 +13,36 @@ class VehicleRequestController extends Controller
 {
     public function index()
     {
-        $requests = VehicleRequest::with(['vehicle', 'driver', 'approvals', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $requests = VehicleRequest::with([
+            'vehicle.vehicleType',
+            'office',
+            'driver',
+            'approvals'
+        ])->orderBy('created_at', 'desc')->get();
 
-        return response()->json($requests);
+        $response = $requests->map(function ($req) {
+            return [
+                'id' => $req->id,
+                'tujuan' => $req->purpose,
+                'nama_kantor' => $req->office->name,
+                'wilayah_kantor' => $req->office->region,
+                'nama_pengemudi' => $req->driver->name,
+                'telepon_pengemudi' => $req->driver->phone,
+                'nama_kendaraan' => $req->vehicle->name,
+                'jenis_kendaraan' => $req->vehicle->vehicleType->name ?? null,
+                'nomor_plat' => $req->vehicle->plate_number,
+                'kepemilikan' => $req->vehicle->ownership,
+                'tanggal_mulai' => $req->start_date,
+                'tanggal_selesai' => $req->end_date,
+                'status_persetujuan_1' => optional($req->approvals->firstWhere('level', 1))->status,
+                'status_persetujuan_2' => optional($req->approvals->firstWhere('level', 2))->status,
+                'status' => $req->status,
+                'created_at' => $req->created_at,
+                'updated_at' => $req->updated_at,
+            ];
+        });
+
+        return response()->json($response);
     }
 
     public function store(Request $request)
@@ -25,6 +50,7 @@ class VehicleRequestController extends Controller
         $validated = $request->validate([
             'vehicle_id' => 'required|exists:vehicles,id',
             'driver_id' => 'required|exists:drivers,id',
+            'office_id' => 'required|exists:offices,id',
             'approver_ids' => 'required|array|min:2',
             'approver_ids.*' => 'exists:users,id',
             'start_date' => 'required|date',
@@ -36,6 +62,7 @@ class VehicleRequestController extends Controller
             'user_id' => Auth::id(),
             'vehicle_id' => $validated['vehicle_id'],
             'driver_id' => $validated['driver_id'],
+            'office_id' => $validated['office_id'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'purpose' => $validated['purpose'],

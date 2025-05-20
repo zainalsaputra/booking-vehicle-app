@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained();
             $table->foreignId('vehicle_id')->constrained();
             $table->foreignId('driver_id')->nullable()->constrained();
+            $table->foreignId('office_id')->nullable()->constrained();
             $table->string('purpose');
             $table->timestamp('start_date');
             $table->timestamp('end_date');
