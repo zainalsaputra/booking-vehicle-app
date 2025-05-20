@@ -4,9 +4,58 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 export function SignIn() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+      setLoading(false);
+
+      if (result.success) {
+        localStorage.setItem("accessToken", result.data.access_token);
+        MySwal.fire({
+          icon: "success",
+          title: "Berhasil Login!",
+          text: result.message,
+        });
+        // TODO: Redirect ke halaman dashboard atau lainnya
+      } else {
+        MySwal.fire({
+          icon: "error",
+          title: "Gagal Login!",
+          text: result.message || "Terjadi kesalahan.",
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      MySwal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Tidak bisa terhubung ke server.",
+      });
+    }
+  };
+
   return (
     <section className="flex h-screen w-screen">
       {/* FORM LOGIN */}
@@ -17,7 +66,7 @@ export function SignIn() {
             Enter your email and password to Sign In.
           </Typography>
         </div>
-        <form className="mt-8 mb-2 w-full max-w-sm">
+        <form onSubmit={handleLogin} className="mt-8 mb-2 w-full max-w-sm">
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Your email
@@ -25,10 +74,9 @@ export function SignIn() {
             <Input
               size="lg"
               placeholder="name@mail.com"
-              className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Password
@@ -37,32 +85,24 @@ export function SignIn() {
               type="password"
               size="lg"
               placeholder="********"
-              className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
           <Checkbox
             label={
-              <Typography
-                variant="small"
-                color="gray"
-                className="flex items-center justify-start font-medium"
-              >
+              <Typography variant="small" color="gray" className="flex items-center justify-start font-medium">
                 I agree the&nbsp;
-                <a
-                  href="#"
-                  className="font-normal text-black transition-colors hover:text-gray-900 underline"
-                >
+                <a href="#" className="font-normal text-black transition-colors hover:text-gray-900 underline">
                   Terms and Conditions
                 </a>
               </Typography>
             }
             containerProps={{ className: "-ml-2.5" }}
           />
-          <Button className="mt-6" fullWidth>
-            Sign In
+          <Button type="submit" className="mt-6" fullWidth disabled={loading}>
+            {loading ? "Loading..." : "Sign In"}
           </Button>
         </form>
       </div>
