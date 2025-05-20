@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Menu } from "@headlessui/react";
@@ -39,9 +40,19 @@ export function Tables() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const resetForm = () => {
+    setFormData({});
+    setSelectedItem(null);
+  };
+
   const handleCreate = async () => {
     try {
       const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        console.error("Token tidak ditemukan!");
+        return;
+      }
 
       const { approver1_id, approver2_id } = formData;
       const approver_id = [approver1_id, approver2_id];
@@ -49,8 +60,6 @@ export function Tables() {
         alert("Mohon pilih dua penyetuju yang berbeda.");
         return;
       }
-
-      console.log(approver_id);
 
       const response = await axios.post(
         "http://localhost:8000/api/vehicle-requests",
@@ -71,31 +80,69 @@ export function Tables() {
         }
       );
 
-      setPengajuanData((prev) => [...prev, response.data]);
-      setFormData({});
+      // setPengajuanData((prev) => [response.data, ...prev]);
+      setCurrentPage(1);
+      resetForm();
       setOpen(false);
+      window.location.reload();
     } catch (error) {
       console.error("Gagal membuat pengajuan:", error);
     }
   };
 
-  const handleDelete = () => {
-    setPengajuanData((prev) => prev.filter((item) => item.id !== selectedItem.id));
-    setOpenDelete(false);
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        console.error("Token tidak ditemukan!");
+        return;
+      }
+
+      console.log(id);
+
+      await axios.delete(`http://localhost:8000/api/vehicle-requests/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      setPengajuanData((prev) => prev.filter((item) => item.id !== selectedItem.id));
+      setCurrentPage(1);
+      setOpenDelete(false);
+    } catch (error) {
+      console.error("Gagal menghapus pengajuan:", error);
+    }
   };
 
   useEffect(() => {
     const fetchPengajuan = async () => {
       try {
         const token = localStorage.getItem("accessToken");
+        if (!token) {
+          console.error("Token tidak ditemukan!");
+          return;
+        }
+
+        const decodedToken = jwtDecode(token);
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        if (decodedToken.exp < currentTime) {
+          console.error("Token sudah expired! Silakan login kembali.");
+          return;
+        }
+
         const response = await axios.get("http://localhost:8000/api/vehicle-requests", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setPengajuanData(response.data);
       } catch (error) {
         console.error("Gagal memuat data pengajuan:", error);
       }
     };
+
     fetchPengajuan();
   }, []);
 
@@ -170,7 +217,7 @@ export function Tables() {
         </DialogBody>
         <DialogFooter>
           <Button variant="text" color="gray" onClick={() => setOpenDelete(false)}>Batal</Button>
-          <Button variant="gradient" color="red" onClick={handleDelete}>Hapus</Button>
+          <Button variant="gradient" color="red" onClick={() => handleDelete(selectedItem?.id)}>Hapus</Button>
         </DialogFooter>
       </Dialog>
 
@@ -282,7 +329,7 @@ export function Tables() {
               disabled={currentPage === totalPages}
               className="px-3 py-1 border-gray-500 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
             >
-              Selanjutnya
+              Berikutnya
             </Button>
           </div>
 
