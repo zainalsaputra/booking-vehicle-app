@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\VehicleRequestController;
+use App\Http\Controllers\VehicleStatisticsController;
 
 Route::group([
     'middleware' => 'api',
@@ -30,3 +31,6 @@ Route::prefix('approvals')->middleware('auth:api')->group(function () {
     Route::get('/pending', [VehicleRequestController::class, 'pendingApprovals']);
     Route::get('/history', [VehicleRequestController::class, 'approvalHistory']);
 });
+
+Route::get('/vehicle-statistics/usage-per-month', [VehicleStatisticsController::class, 'usagePerMonth']);
+
