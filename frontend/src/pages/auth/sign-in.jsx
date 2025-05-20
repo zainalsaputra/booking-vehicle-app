@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   Input,
   Checkbox,
@@ -6,11 +7,10 @@ import {
 } from "@material-tailwind/react";
 import { useState } from "react";
 import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 
-const MySwal = withReactContent(Swal);
 
 export function SignIn() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,14 +33,10 @@ export function SignIn() {
 
       if (result.success) {
         localStorage.setItem("accessToken", result.data.access_token);
-        MySwal.fire({
-          icon: "success",
-          title: "Berhasil Login!",
-          text: result.message,
-        });
-        // TODO: Redirect ke halaman dashboard atau lainnya
+        Swal.fire({ icon: "success", title: "Berhasil Login!" });
+        navigate("/dashboard");
       } else {
-        MySwal.fire({
+        Swal.fire({
           icon: "error",
           title: "Gagal Login!",
           text: result.message || "Terjadi kesalahan.",
@@ -48,7 +44,7 @@ export function SignIn() {
       }
     } catch (error) {
       setLoading(false);
-      MySwal.fire({
+      Swal.fire({
         icon: "error",
         title: "Error!",
         text: "Tidak bisa terhubung ke server.",
