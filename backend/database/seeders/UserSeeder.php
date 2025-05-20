@@ -11,20 +11,12 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminRole = Role::where('name', 'admin')->first();
-        $approvalRole = Role::where('name', 'approval')->first();
-
-        if (!$adminRole || !$approvalRole) {
-            $this->command->error('Role admin atau approval belum ada. Jalankan RoleSeeder dulu.');
-            return;
-        }
-
         User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
-                'role_id' => $adminRole->id,
+                'role_id' => 1,
             ]
         );
 
@@ -33,7 +25,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Approval 1',
                 'password' => Hash::make('password'),
-                'role_id' => $approvalRole->id,
+                'role_id' => 2,
             ]
         );
 
@@ -42,7 +34,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Approval 2',
                 'password' => Hash::make('password'),
-                'role_id' => $approvalRole->id,
+                'role_id' => 2,
             ]
         );
     }

@@ -70,4 +70,83 @@ class VehicleRequestController extends Controller
 
         return response()->json($request);
     }
+
+    public function approve(Request $request, $id)
+    {
+        $requestApproval = VehicleApproval::where('vehicle_request_id', $id)
+            ->where('approver_id', Auth::id())
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $previousLevelsPending = VehicleApproval::where('vehicle_request_id', $id)
+            ->where('level', '<', $requestApproval->level)
+            ->where('status', '!=', 'approved')
+            ->count();
+
+        if ($previousLevelsPending > 0) {
+            return response()->json([
+                'message' => 'Anda tidak dapat menyetujui sebelum approver di level sebelumnya menyetujui.'
+            ], 403);
+        }
+
+        $requestApproval->update([
+            'status' => 'approved',
+            'note' => $request->note
+        ]);
+
+        $pendingCount = VehicleApproval::where('vehicle_request_id', $id)
+            ->where('status', 'pending')
+            ->count();
+
+        if ($pendingCount === 0) {
+            $requestModel = VehicleRequest::find($id);
+            $requestModel->update(['status' => 'approved']);
+        }
+
+        ActivityLogger::log(
+            module: 'vehicle_approval',
+            action: 'approve',
+            description: 'Approver menyetujui permintaan kendaraan',
+            data: $requestApproval->toArray()
+        );
+
+        return response()->json([
+            'message' => 'Permintaan kendaraan disetujui',
+            'data' => $requestApproval
+        ]);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'note' => 'required|string|max:255'
+        ]);
+
+        $requestApproval = VehicleApproval::where('vehicle_request_id', $id)
+            ->where('approver_id', Auth::id())
+            ->where('status', 'pending')
+            ->orderBy('level')
+            ->firstOrFail();
+
+        $requestApproval->update([
+            'status' => 'rejected',
+            'note' => $request->note
+        ]);
+
+        // Ubah status utama menjadi "rejected" secara keseluruhan
+        $requestModel = VehicleRequest::find($id);
+        $requestModel->update(['status' => 'rejected']);
+
+        ActivityLogger::log(
+            module: 'vehicle_approval',
+            action: 'reject',
+            description: 'User menolak permintaan kendaraan',
+            data: $requestApproval->toArray()
+        );
+
+        return response()->json([
+            'message' => 'Permintaan kendaraan ditolak',
+            'data' => $requestApproval
+        ]);
+    }
 }

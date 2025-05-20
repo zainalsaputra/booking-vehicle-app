@@ -39,12 +39,12 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 404);
         });
 
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Endpoint not found.',
-            ], 404);
-        });
+        // $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Endpoint not found.',
+        //     ], 404);
+        // });
 
         // $exceptions->render(function (\Illuminate\Database\QueryException $e, $request) {
         //     if ($e->getCode() === '23505') {

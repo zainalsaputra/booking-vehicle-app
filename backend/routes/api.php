@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\VehicleRequestController;
- 
+
 Route::group([
     'middleware' => 'api',
     'prefix' => 'auth'
@@ -21,5 +21,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [VehicleRequestController::class, 'index']);
         Route::post('/', [VehicleRequestController::class, 'store']);
         Route::get('{id}', [VehicleRequestController::class, 'show']);
+        Route::post('/{id}/approve', [VehicleRequestController::class, 'approve']);
+        Route::post('/{id}/reject', [VehicleRequestController::class, 'reject']);
     });
 });

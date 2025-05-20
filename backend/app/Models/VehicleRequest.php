@@ -16,6 +16,7 @@ class VehicleRequest extends Model
         'start_date',
         'end_date',
         'purpose',
+        'status'
     ];
     
     public function user()
