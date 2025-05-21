@@ -1,4 +1,7 @@
 import React from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
 import {
   Typography,
   Card,
@@ -20,14 +23,48 @@ import {
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
 import {
-  statisticsCardsData,
-  statisticsChartsData,
+  // statisticsCardsData,
+  // statisticsChartsData,
   projectsTableData,
   ordersOverviewData,
+  statisticsChartsData,
+  statisticsCardsData,
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
 
 export function Home() {
+
+  // const [chartData, setChartData] = useState([]);
+
+  // useEffect(() => {
+  //   axios.get("http://localhost:8000/api/vehicle-statistics/usage-per-month")
+  //     .then((response) => {
+  //       const labels = response.data.map((item) => item.month);
+  //       const data = response.data.map((item) => item.total);
+
+  //       setChartData([
+  //         {
+  //           color: "blue",
+  //           title: "Permintaan Kendaraan per Bulan",
+  //           description: "Statistik berdasarkan jumlah request yang disetujui",
+  //           footer: "Update otomatis",
+  //           chart: {
+  //             labels: labels,
+  //             datasets: [
+  //               {
+  //                 label: "Permintaan",
+  //                 data: data,
+  //               },
+  //             ],
+  //           },
+  //         }
+  //       ]);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Gagal memuat data grafik:", error);
+  //     });
+  // }, []);
+
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
@@ -126,11 +163,10 @@ export function Home() {
               <tbody>
                 {projectsTableData.map(
                   ({ img, name, members, budget, completion }, key) => {
-                    const className = `py-3 px-5 ${
-                      key === projectsTableData.length - 1
-                        ? ""
-                        : "border-b border-blue-gray-50"
-                    }`;
+                    const className = `py-3 px-5 ${key === projectsTableData.length - 1
+                      ? ""
+                      : "border-b border-blue-gray-50"
+                      }`;
 
                     return (
                       <tr key={name}>
@@ -154,9 +190,8 @@ export function Home() {
                                 alt={name}
                                 size="xs"
                                 variant="circular"
-                                className={`cursor-pointer border-2 border-white ${
-                                  key === 0 ? "" : "-ml-2.5"
-                                }`}
+                                className={`cursor-pointer border-2 border-white ${key === 0 ? "" : "-ml-2.5"
+                                  }`}
                               />
                             </Tooltip>
                           ))}
@@ -219,11 +254,10 @@ export function Home() {
               ({ icon, color, title, description }, key) => (
                 <div key={title} className="flex items-start gap-4 py-3">
                   <div
-                    className={`relative p-1 after:absolute after:-bottom-6 after:left-2/4 after:w-0.5 after:-translate-x-2/4 after:bg-blue-gray-50 after:content-[''] ${
-                      key === ordersOverviewData.length - 1
-                        ? "after:h-0"
-                        : "after:h-4/6"
-                    }`}
+                    className={`relative p-1 after:absolute after:-bottom-6 after:left-2/4 after:w-0.5 after:-translate-x-2/4 after:bg-blue-gray-50 after:content-[''] ${key === ordersOverviewData.length - 1
+                      ? "after:h-0"
+                      : "after:h-4/6"
+                      }`}
                   >
                     {React.createElement(icon, {
                       className: `!w-5 !h-5 ${color}`,

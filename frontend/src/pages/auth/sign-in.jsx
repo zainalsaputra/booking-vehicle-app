@@ -59,13 +59,13 @@ export function SignIn() {
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">
-            Enter your email and password to Sign In.
+            Masukan Email dan Password anda untuk Sign In.
           </Typography>
         </div>
         <form onSubmit={handleLogin} className="mt-8 mb-2 w-full max-w-sm">
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-              Your email
+              Email
             </Typography>
             <Input
               size="lg"
@@ -89,9 +89,9 @@ export function SignIn() {
           <Checkbox
             label={
               <Typography variant="small" color="gray" className="flex items-center justify-start font-medium">
-                I agree the&nbsp;
+                Saya setuju dengan&nbsp;
                 <a href="#" className="font-normal text-black transition-colors hover:text-gray-900 underline">
-                  Terms and Conditions
+                  Syarat dan Ketentuan
                 </a>
               </Typography>
             }
@@ -112,7 +112,7 @@ export function SignIn() {
         />
         <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-center p-6">
           <Typography variant="h3" className="text-white font-bold">
-            Sistem Manajemen Kendaraan
+            Sistem Manajemen Transportasi Perusahaan
           </Typography>
           <Typography variant="paragraph" className="text-white mt-2 max-w-sm">
             Kelola armada dan pengemudi Anda dengan lebih mudah dan efisien.

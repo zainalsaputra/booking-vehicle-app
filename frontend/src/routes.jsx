@@ -5,7 +5,7 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Approver, Pengajuan } from "@/pages/dashboard";
+import { Home, Approver, Pengajuan, Laporan } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 
 // Decode token untuk mendapatkan role
@@ -36,6 +36,12 @@ export const routes = [
         path: "/home",
         element: <Home />,
       },
+      {
+        icon: <RectangleStackIcon {...icon} />,
+        name: "laporan",
+        path: "/laporan",
+        element: <Laporan />,
+      },
       ...(userRole === 1
         ? [
             {
@@ -55,7 +61,7 @@ export const routes = [
               element: <Approver />,
             },
           ]
-        : []), // Hanya tampil jika user role 2
+        : []), 
     ],
   },
   {
