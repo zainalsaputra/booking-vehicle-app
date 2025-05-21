@@ -10,36 +10,11 @@ import { EllipsisVerticalIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/r
 
 export function Approver() {
   const [openReject, setOpenReject] = useState(false);
+  const [openApprove, setOpenApprove] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [pengajuanData, setPengajuanData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  const handleReject = async (id) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-
-      if (!token) {
-        console.error("Token tidak ditemukan!");
-        return;
-      }
-
-      console.log(id);
-
-      await axios.get(`http://localhost:8000/api/vehicle-requests/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      setPengajuanData((prev) => prev.filter((item) => item.id !== selectedItem.id));
-      setCurrentPage(1);
-      setOpenReject(false);
-    } catch (error) {
-      console.error("Gagal menghapus pengajuan:", error);
-    }
-  };
 
   useEffect(() => {
     const fetchPengajuan = async () => {
@@ -71,6 +46,62 @@ export function Approver() {
     fetchPengajuan();
   }, []);
 
+  const handleApprove = async (id) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        console.error("Token tidak ditemukan!");
+        return;
+      }
+
+      console.log(id);
+
+      await axios.post(`http://localhost:8000/api/vehicle-requests/${id}/approve`, {
+        note: "Diterima"
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      setPengajuanData((prev) => prev.filter((item) => item.id !== selectedItem.id));
+      setCurrentPage(1);
+      setOpenApprove(false);
+    } catch (error) {
+      console.error("Gagal menerima pengajuan:", error);
+      window.alert(error.response.data.message);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        console.error("Token tidak ditemukan!");
+        return;
+      }
+
+      await axios.post(`http://localhost:8000/api/vehicle-requests/${id}/reject`, {
+        note: "Ditolak"
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      setPengajuanData((prev) => prev.filter((item) => item.id !== selectedItem.id));
+      setCurrentPage(1);
+      setOpenReject(false);
+    } catch (error) {
+      console.error("Gagal menolak pengajuan:", error);
+      window.alert(error.response.data.message);
+    }
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = pengajuanData.slice(indexOfFirstItem, indexOfLastItem);
@@ -78,14 +109,26 @@ export function Approver() {
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
+      
       <Dialog open={openReject} handler={() => setOpenReject(false)}>
-        <DialogHeader>Hapus Pengajuan</DialogHeader>
+        <DialogHeader>Tolak Pengajuan</DialogHeader>
         <DialogBody>
           Apakah Anda ingin menolak pengajuan dari <strong>{selectedItem?.nama_kantor}</strong>?
         </DialogBody>
         <DialogFooter>
           <Button variant="text" color="gray" onClick={() => setOpenReject(false)}>Batal</Button>
-          <Button variant="gradient" color="red" onClick={() => handleReject(selectedItem?.id)}>Hapus</Button>
+          <Button variant="gradient" color="red" onClick={() => handleReject(selectedItem?.vehicle_request_id)}>Iya</Button>
+        </DialogFooter>
+      </Dialog>
+
+      <Dialog open={openApprove} handler={() => setOpenApprove(false)}>
+        <DialogHeader>Terima Pengajuan</DialogHeader>
+        <DialogBody>
+          Apakah Anda ingin menerima pengajuan dari <strong>{selectedItem?.nama_kantor}</strong>?
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="gray" onClick={() => setOpenApprove(false)}>Batal</Button>
+          <Button variant="gradient" color="greem" onClick={() => handleApprove(selectedItem?.vehicle_request_id)}>Iya</Button>
         </DialogFooter>
       </Dialog>
 
@@ -97,7 +140,7 @@ export function Approver() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["No", "Kantor", "Kendaraan", "Spesifikasi", "Supir", "Tujuan", "Tanggal", "Aksi"].map((el) => (
+                {["No", "Kantor", "Kendaraan", "Spesifikasi", "Supir", "Tujuan", "Level", "Aksi"].map((el) => (
                   <th key={el} className="border-b py-3 px-5 text-left">
                     <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
                       {el}
@@ -112,7 +155,7 @@ export function Approver() {
                   <td className="py-3 px-5">{indexOfFirstItem + index + 1}</td>
 
                   <td className="py-3 px-5">
-                    <Typography className="text-sm font-semibold text-blue-gray-600">{item.kantor}</Typography>
+                    <Typography className="text-sm font-semibold text-blue-gray-600">{item.nama_kantor}</Typography>
                     <Typography className="text-xs font-normal text-blue-gray-500">{item.wilayah_kantor}</Typography>
                   </td>
 
@@ -120,7 +163,7 @@ export function Approver() {
                     <Typography className="text-sm font-semibold text-blue-gray-600">{item.nama_kendaraan}</Typography>
                     <Typography className="text-xs font-normal text-blue-gray-500">{item.plat_nomor}</Typography>
                   </td>
-                
+
                   <td className="py-3 px-5">
                     <Typography className="text-sm font-semibold text-blue-gray-600">{item.jenis_kendaraan}</Typography>
                     <Typography className="text-xs font-normal text-blue-gray-500">{item.pemilik}</Typography>
@@ -133,22 +176,16 @@ export function Approver() {
 
                   <td className="py-3 px-5">
                     <Typography className="text-sm text-blue-gray-600">{item.tujuan}</Typography>
-                  </td>
-
-                  <td className="py-3 px-5">
-                    <Typography className="text-xs text-blue-gray-600">
+                    <Typography className="text-xs text-blue-gray-500">
                       {new Date(item.tanggal_mulai).toLocaleDateString()} - {new Date(item.tanggal_selesai).toLocaleDateString()}
                     </Typography>
                   </td>
 
-                  {/* <td className="py-3 px-5">
-                    <Chip
-                      variant="gradient"
-                      color={item.status === "pending" ? "amber" : item.status === "approved" ? "green" : "red"}
-                      value={item.status}
-                      className="py-0.5 px-0 text-[11px] font-medium w-fit"
-                    />
-                  </td> */}
+                  <td className="py-3 px-5">
+                    <Typography className="text-xs text-blue-gray-600 text-center">
+                      {item.level}
+                    </Typography>
+                  </td>
 
                   <td className="py-3 px-5">
                     <Menu as="div" className="relative inline-block text-left">
@@ -160,10 +197,13 @@ export function Approver() {
                           <Menu.Item>
                             {({ active }) => (
                               <button
-                                onClick={() => setSelectedItem(item)}
+                                onClick={() => {
+                                  setSelectedItem(item);
+                                  setOpenApprove(true);
+                                }}
                                 className={`${active ? "bg-gray-100" : ""} group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-700`}
                               >
-                                <PencilIcon className="mr-2 h-4 w-4" /> Update
+                                <CheckCircleIcon className="mr-2 h-4 w-4" /> Terima
                               </button>
                             )}
                           </Menu.Item>
@@ -172,11 +212,11 @@ export function Approver() {
                               <button
                                 onClick={() => {
                                   setSelectedItem(item);
-                                  setOpenDelete(true);
+                                  setOpenReject(true);
                                 }}
                                 className={`${active ? "bg-gray-100" : ""} group flex w-full items-center rounded-md px-2 py-2 text-sm text-red-600`}
                               >
-                                <TrashIcon className="mr-2 h-4 w-4" /> Delete
+                                <XCircleIcon className="mr-2 h-4 w-4" /> Tolak
                               </button>
                             )}
                           </Menu.Item>
