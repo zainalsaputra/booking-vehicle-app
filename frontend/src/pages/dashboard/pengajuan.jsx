@@ -230,7 +230,7 @@ export function Pengajuan() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["No", "Kantor", "Kendaraan", "Supir", "Tanggal", "Status", "Aksi"].map((el) => (
+                {["No", "Kantor", "Kendaraan", "Spesifikasi", "Supir", "Tujuan", "Status", "Aksi"].map((el) => (
                   <th key={el} className="border-b py-3 px-5 text-left">
                     <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">{el}</Typography>
                   </th>
@@ -241,23 +241,34 @@ export function Pengajuan() {
               {currentItems.map((item, index) => (
                 <tr key={item.id}>
                   <td className="py-3 px-5">{indexOfFirstItem + index + 1}</td>
+
                   <td className="py-3 px-5">
                     <Typography className="text-sm font-semibold text-blue-gray-600">{item.nama_kantor}</Typography>
                     <Typography className="text-xs font-normal text-blue-gray-500">{item.wilayah_kantor}</Typography>
                   </td>
+
                   <td className="py-3 px-5">
                     <Typography className="text-sm font-semibold text-blue-gray-600">{item.nama_kendaraan}</Typography>
-                    <Typography className="text-xs font-normal text-blue-gray-500">{item.nomor_plat} - {item.jenis_kendaraan}</Typography>
+                    <Typography className="text-xs font-normal text-blue-gray-500">{item.nomor_plat}</Typography>
                   </td>
+
+                  <td className="py-3 px-5">
+                    <Typography className="text-sm font-semibold text-blue-gray-600">{item.jenis_kendaraan}</Typography>
+                    <Typography className="text-xs font-normal text-blue-gray-500">{item.kepemilikan}</Typography>
+                  </td>
+
                   <td className="py-3 px-5">
                     <Typography className="text-sm font-semibold text-blue-gray-600">{item.nama_pengemudi}</Typography>
                     <Typography className="text-xs font-normal text-blue-gray-500">{item.telepon_pengemudi}</Typography>
                   </td>
+
                   <td className="py-3 px-5">
-                    <Typography className="text-xs text-blue-gray-600">
+                    <Typography className="text-sm text-blue-gray-600">{item.tujuan}</Typography>
+                    <Typography className="text-xs text-blue-gray-500">
                       {new Date(item.tanggal_mulai).toLocaleDateString()} - {new Date(item.tanggal_selesai).toLocaleDateString()}
                     </Typography>
                   </td>
+
                   <td className="py-3 px-5">
                     <Chip
                       variant="gradient"
@@ -266,6 +277,7 @@ export function Pengajuan() {
                       className="py-0.5 px-2 text-[11px] font-medium w-fit"
                     />
                   </td>
+
                   <td className="py-3 px-5">
                     <Menu as="div" className="relative inline-block text-left">
                       <Menu.Button className="p-1 rounded-full hover:bg-gray-100">
