@@ -19,17 +19,64 @@ export function Pengajuan() {
   const itemsPerPage = 10;
 
   const vehicles = [
-    { id: 1, name: "Toyota Hilux" },
-    { id: 2, name: "Suzuki Carry" },
+    {
+      id: 1,
+      name: "Toyota Hilux",
+      plate_number: "N 1234 AB",
+      ownership: "company",
+      vehicle_type_id: 1,
+    },
+    {
+      id: 2,
+      name: "Mitsubishi Triton",
+      plate_number: "L 5678 CD",
+      ownership: "rented",
+      vehicle_type_id: 2,
+    },
+    {
+      id: 3,
+      name: "Isuzu D-Max",
+      plate_number: "B 9012 EF",
+      ownership: "company",
+      vehicle_type_id: 1,
+    },
   ];
+
   const offices = [
-    { id: 1, name: "Kantor Cabang I", region: "Malang" },
-    { id: 2, name: "Kantor Pusat", region: "Surabaya" },
+    {
+      id: 1,
+      name: "Kantor Pusat",
+      region: "Surabaya",
+    },
+    {
+      id: 2,
+      name: "Kantor Cabang I",
+      region: "Malang",
+    },
+    {
+      id: 3,
+      name: "Kantor Cabang II",
+      region: "Jember",
+    },
   ];
   const drivers = [
-    { id: 1, name: "Budi Santoso", phone: "08234567890" },
-    { id: 2, name: "Rina Yuliati", phone: "085700011122" },
+    {
+      id: 1,
+      name: "Ahmad Rofiq",
+      phone: "08123456789",
+    },
+    {
+      id: 2,
+      name: "Budi Santoso",
+      phone: "08234567890",
+    },
+    {
+      id: 3,
+      name: "Citra Ayu",
+      phone: "08345678901",
+    },
   ];
+
   const approvers = [
     { id: 2, name: "Andi HRD", email: "andi@kantor.com" },
     { id: 3, name: "Siti Finance", email: "siti@kantor.com" },
