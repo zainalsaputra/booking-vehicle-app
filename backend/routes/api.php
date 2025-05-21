@@ -28,6 +28,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('{id}', [VehicleRequestController::class, 'show']);
         Route::post('/{id}/approve', [VehicleRequestController::class, 'approve']);
         Route::post('/{id}/reject', [VehicleRequestController::class, 'reject']);
+        Route::delete('/{id}', [VehicleRequestController::class, 'destroy']);
     });
 });
 

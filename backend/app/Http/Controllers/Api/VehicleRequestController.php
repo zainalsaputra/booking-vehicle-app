@@ -54,7 +54,7 @@ class VehicleRequestController extends Controller
             'approver_ids' => 'required|array|min:2',
             'approver_ids.*' => 'exists:users,id',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_date' => 'required|date',
             'purpose' => 'required|string|max:255',
         ]);
 
@@ -111,7 +111,7 @@ class VehicleRequestController extends Controller
 
         if ($isRejected) {
             return response()->json([
-                'message' => 'Permintaan ini telah ditolak oleh approver sebelumnya. Anda tidak dapat melakukan approval.',
+                'message' => 'Permintaan ini telah ditolak oleh approver level 1. Anda tidak dapat melakukan approval.',
             ], 403);
         }
 
@@ -122,7 +122,7 @@ class VehicleRequestController extends Controller
 
         if ($previousLevelsPending > 0) {
             return response()->json([
-                'message' => 'Approver pertama masih belum melakukan review.'
+                'message' => 'Approver level 1 masih belum melakukan review.'
             ], 403);
         }
 
@@ -130,7 +130,7 @@ class VehicleRequestController extends Controller
             'status' => 'approved',
             'note' => $request->note
         ]);
-        
+
         $pendingCount = VehicleApproval::where('vehicle_request_id', $id)
             ->where('status', 'pending')
             ->count();
@@ -153,7 +153,6 @@ class VehicleRequestController extends Controller
         ]);
     }
 
-
     public function reject(Request $request, $id)
     {
         $request->validate([
@@ -172,7 +171,7 @@ class VehicleRequestController extends Controller
 
         if ($previousLevelsPending > 0) {
             return response()->json([
-                'message' => 'Approver pertama masih belum melakukan review.'
+                'message' => 'Approver level 1 masih belum melakukan review.'
             ], 403);
         }
 
@@ -199,8 +198,8 @@ class VehicleRequestController extends Controller
 
     public function pendingApprovals()
     {
-        $approvals = VehicleApproval::with(['vehicleRequest.user', 'vehicleRequest.vehicle'])
-            ->where('approver_id', Auth::id())
+        $approvals = VehicleApproval::with(['vehicleRequest.user', 'vehicleRequest.vehicle', 'vehicleRequest.vehicle.vehicleType', 'vehicleRequest.driver', 'vehicleRequest.office'])
+            ->where('approver_id', operator: Auth::id())
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -208,14 +207,22 @@ class VehicleRequestController extends Controller
         $response = $approvals->map(function ($approval) {
             return [
                 'id' => $approval->id,
+                'level' => $approval->level,
+                // 'approver_id' => $approval->approver_id,
                 'vehicle_request_id' => $approval->vehicle_request_id,
                 'nama_pemohon' => $approval->vehicleRequest->user->name,
                 'nama_kendaraan' => $approval->vehicleRequest->vehicle->name,
+                'kepemilikan' => $approval->vehicleRequest->vehicle->ownership,
+                'nomor_plat' => $approval->vehicleRequest->vehicle->plate_number,
+                'jenis_kendaraan' =>  $approval->vehicleRequest->vehicle->vehicleType->name,
+                'nama_pengemudi' => $approval->vehicleRequest->driver->name,
+                'telepon_pengemudi' => $approval->vehicleRequest->driver->phone,
+                'nama_kantor' =>  $approval->vehicleRequest->office->name,
+                'wilayah_kantor' =>  $approval->vehicleRequest->office->region,
                 'tujuan' => $approval->vehicleRequest->purpose,
                 'tanggal_mulai' => $approval->vehicleRequest->start_date,
                 'tanggal_selesai' => $approval->vehicleRequest->end_date,
                 'status' => $approval->status,
-                'level' => $approval->level,
             ];
         });
 
@@ -243,5 +250,25 @@ class VehicleRequestController extends Controller
         });
 
         return response()->json($response);
+    }
+
+    public function destroy($id)
+    {
+        $vehicleRequest = VehicleRequest::findOrFail($id);
+
+        VehicleApproval::where('vehicle_request_id', $id)->delete();
+
+        $vehicleRequest->delete();
+
+        ActivityLogger::log(
+            module: 'vehicle_request',
+            action: 'delete',
+            description: 'User menghapus pemesanan kendaraan',
+            data: ['vehicle_request_id' => $id]
+        );
+
+        return response()->json([
+            'message' => 'Pemesanan kendaraan berhasil dihapus',
+        ]);
     }
 }
