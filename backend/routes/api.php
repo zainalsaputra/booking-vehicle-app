@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\ApproverController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\OfficeController;
+use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\VehicleReportController;
 use App\Http\Controllers\Api\VehicleRequestController;
+use App\Http\Controllers\Api\VehicleStatisticsController;
 
 Route::group([
     'middleware' => 'api',
@@ -23,6 +29,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('{id}', [VehicleRequestController::class, 'show']);
         Route::post('/{id}/approve', [VehicleRequestController::class, 'approve']);
         Route::post('/{id}/reject', [VehicleRequestController::class, 'reject']);
+        Route::delete('/{id}', [VehicleRequestController::class, 'destroy']);
     });
 });
 
@@ -30,3 +37,12 @@ Route::prefix('approvals')->middleware('auth:api')->group(function () {
     Route::get('/pending', [VehicleRequestController::class, 'pendingApprovals']);
     Route::get('/history', [VehicleRequestController::class, 'approvalHistory']);
 });
+
+Route::get('/vehicle-statistics/usage-per-month', [VehicleStatisticsController::class, 'usagePerMonth']);
+
+Route::get('/vehicles', [VehicleController::class, 'index']);
+Route::get('/offices', [OfficeController::class, 'index']);
+Route::get('/drivers', [DriverController::class, 'index']);
+Route::get('/approvers', [ApproverController::class, 'index']);
+
+Route::get('/vehicle-report', [VehicleReportController::class, 'generate']);

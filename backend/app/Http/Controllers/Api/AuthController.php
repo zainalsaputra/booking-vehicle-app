@@ -59,12 +59,12 @@ class AuthController extends BaseController
         $credentials = request(['email', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
-            return $this->sendError('Unauthorized.', ['error' => 'Unauthorized']);
+            return $this->sendError('Periksa kembali email dan password anda');
         }
 
         $success = $this->respondWithToken($token);
 
-        return $this->sendResponse($success, 'User login successfully.');
+        return $this->sendResponse($success, 'Selamat datang');
     }
 
     /**
