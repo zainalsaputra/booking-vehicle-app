@@ -7,8 +7,9 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\OfficeController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\VehicleReportController;
 use App\Http\Controllers\Api\VehicleRequestController;
-use App\Http\Controllers\VehicleStatisticsController;
+use App\Http\Controllers\Api\VehicleStatisticsController;
 
 Route::group([
     'middleware' => 'api',
@@ -44,3 +45,4 @@ Route::get('/offices', [OfficeController::class, 'index']);
 Route::get('/drivers', [DriverController::class, 'index']);
 Route::get('/approvers', [ApproverController::class, 'index']);
 
+Route::get('/vehicle-report', [VehicleReportController::class, 'generate']);
